@@ -3,6 +3,7 @@
  * Modified by Bluscream
 */
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Harmony;
 using MelonLoader;
@@ -94,11 +95,11 @@ namespace RecenterVR
 			if (CheckKeysPressed("list_joysticks"))
 			{
 				MelonLogger.Log("Getting joysticks...");
-				this.GetJoySticks();
+				GetJoySticks();
 			}
 		}
 
-		private string[] GetJoySticks()
+		private void GetJoySticks()
 		{
 			string[] joysticks = Input.GetJoystickNames();
 			MelonLogger.Log("Connected Joysticks:");
@@ -106,7 +107,13 @@ namespace RecenterVR
 			{
 				MelonLogger.Log("\t- " + joystick);
 			}
-			return joysticks;
+			var inputDevices = new List<UnityEngine.XR.InputDevice>();
+            InputDevices.GetDevices(inputDevices);
+			MelonLogger.Log("Connected VR Devices:");
+			foreach (var device in inputDevices)
+			{
+				MelonLogger.Log($"\t- {device.name} ({device.role}/{device.characteristics})");
+			}
 		}
 	}
 }
