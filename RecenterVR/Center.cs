@@ -17,37 +17,27 @@ namespace RecenterVR
 {
 	public class Center : MelonMod
 	{
+		private const string mod = "RecenterVR";
+		private const string category = "RecenterVR Hotkeys";
 		public override void OnApplicationStart()
 		{
 			SceneManager.sceneLoaded += new UnityAction<Scene, LoadSceneMode>(OnSceneLoaded);
-            MelonPrefs.RegisterCategory("RecenterVR", "RecenterVR Hotkeys");
-			MelonPrefs.RegisterString("RecenterVR", "List of Keys:", "https://docs.unity3d.com/Manual/class-InputManager.html", "Description", true);
-			MelonPrefs.RegisterString("RecenterVR", "recenter", "t:joystick button 0,joystick button 3", "Recenter");
-			MelonPrefs.RegisterString("RecenterVR", "hide_hud", "u", "Hide HUD");
-			MelonPrefs.RegisterString("RecenterVR", "reset_audio", "i", "Reset audio");
-			MelonPrefs.RegisterString("RecenterVR", "list_joysticks", "f1", "List connected joysticks");
+			MelonPrefs.RegisterCategory(mod, mod);
+			MelonPrefs.RegisterBool(mod, "seated", true, "Recenter as Seated VR");
+			MelonPrefs.RegisterBool(mod, "auto_recenter", true, "Automatically Recenter");
+			MelonPrefs.RegisterCategory(category, category);
+			MelonPrefs.RegisterString(category, "List of Keys:", "https://docs.unity3d.com/Manual/class-InputManager.html", "Description", true);
+			MelonPrefs.RegisterString(category, "recenter", "t:joystick button 0,joystick button 3", "Recenter");
+			MelonPrefs.RegisterString(category, "hide_hud", "u", "Hide HUD");
+			MelonPrefs.RegisterString(category, "reset_audio", "i", "Reset audio");
+			MelonPrefs.RegisterString(category, "list_joysticks", "f1", "List connected joysticks");
 			GetJoySticks();
 			MelonLogger.Log("OnApplicationStart > Check \"UserData/modprefs.ini\" for settings");
 		}
 
-		private bool CheckKeysPressed(string option) {
-			var bindings = MelonPrefs.GetString("RecenterVR", option);
-			foreach (var binds in bindings.Split(':'))
-			{
-				var bind_trues = new bool[] { };
-				foreach (var bind in binds.Split(','))
-				{
-					bind_trues.Add(Input.GetKeyDown(bind));
-				}
-				if (bind_trues.All(t => t == true))
-					return true;
-			}
-			return false;
-		}
-
 		private static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
 		{
-			if (scene.name == "StartScreen")
+			if (scene.name == "StartScreen" && MelonPrefs.GetBool(mod, "auto_recenter"))
 			{
 				RecenterCamera();
 			}
@@ -62,14 +52,30 @@ namespace RecenterVR
 			else if (XRSettings.loadedDeviceName == "OpenVR")
 			{
 				OpenVR.System.ResetSeatedZeroPose();
-				OpenVR.Compositor.SetTrackingSpace(ETrackingUniverseOrigin.TrackingUniverseSeated);
+				OpenVR.Compositor.SetTrackingSpace(MelonPrefs.GetBool(category, "seated") ? ETrackingUniverseOrigin.TrackingUniverseSeated : ETrackingUniverseOrigin.TrackingUniverseStanding);
 			}
+		}
+
+		private bool CheckKeysPressed(string option)
+		{
+			var bindings = MelonPrefs.GetString("RecenterVR", option);
+			foreach (var binds in bindings.Split(':'))
+			{
+				var bind_trues = new bool[] { };
+				foreach (var bind in binds.Split(','))
+				{
+					bind_trues.Add(Input.GetKeyDown(bind));
+				}
+				if (bind_trues.All(t => t == true))
+					return true;
+			}
+			return false;
 		}
 
 		public override void OnUpdate()
 		{
 			if (XRSettings.enabled) {
-				if (CheckKeysPressed("recenter_pc") || CheckKeysPressed("recenter_xbox"))
+				if (CheckKeysPressed("recenter"))
 				{
 					RecenterCamera();
 				}
@@ -107,7 +113,7 @@ namespace RecenterVR
 			{
 				MelonLogger.Log("\t- " + joystick);
 			}
-			var inputDevices = new List<UnityEngine.XR.InputDevice>();
+			var inputDevices = new List<InputDevice>();
             InputDevices.GetDevices(inputDevices);
 			MelonLogger.Log("Connected VR Devices:");
 			foreach (var device in inputDevices)
