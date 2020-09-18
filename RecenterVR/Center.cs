@@ -20,6 +20,7 @@ namespace RecenterVR
 		{
 			SceneManager.sceneLoaded += new UnityAction<Scene, LoadSceneMode>(OnSceneLoaded);
             MelonPrefs.RegisterCategory("RecenterVR", "RecenterVR Hotkeys");
+			MelonPrefs.RegisterString("RecenterVR", "List of Keys:", "https://docs.unity3d.com/Manual/class-InputManager.html", "Description", true);
 			MelonPrefs.RegisterString("RecenterVR", "recenter", "t:joystick button 0,joystick button 3", "Recenter");
 			MelonPrefs.RegisterString("RecenterVR", "hide_hud", "u", "Hide HUD");
 			MelonPrefs.RegisterString("RecenterVR", "reset_audio", "i", "Reset audio");
