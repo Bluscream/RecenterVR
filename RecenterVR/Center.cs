@@ -20,23 +20,27 @@ namespace RecenterVR
 		{
 			SceneManager.sceneLoaded += new UnityAction<Scene, LoadSceneMode>(OnSceneLoaded);
             MelonPrefs.RegisterCategory("RecenterVR", "RecenterVR Hotkeys");
-			MelonPrefs.RegisterString("RecenterVR", "recenter_pc", "t", "Recenter (Keyboard)");
-			MelonPrefs.RegisterString("RecenterVR", "recenter_xbox", "joystick button 0,joystick button 3", "Recenter (Controller)");
-			MelonPrefs.RegisterString("RecenterVR", "hide_hud", "u", "Hide HUD (Keyboard)");
-			MelonPrefs.RegisterString("RecenterVR", "reset_audio", "i", "Reset audio (Keyboard)");
-			MelonPrefs.RegisterString("RecenterVR", "list_joysticks", "f1", "List connected joysticks (Keyboard)");
+			MelonPrefs.RegisterString("RecenterVR", "recenter", "t:joystick button 0,joystick button 3", "Recenter");
+			MelonPrefs.RegisterString("RecenterVR", "hide_hud", "u", "Hide HUD");
+			MelonPrefs.RegisterString("RecenterVR", "reset_audio", "i", "Reset audio");
+			MelonPrefs.RegisterString("RecenterVR", "list_joysticks", "f1", "List connected joysticks");
 			GetJoySticks();
 			MelonLogger.Log("OnApplicationStart > Check \"UserData/modprefs.ini\" for settings");
 		}
 
 		private bool CheckKeysPressed(string option) {
-			var binds = MelonPrefs.GetString("RecenterVR", option);
-			var trues = new bool[] { };
-            foreach (var bind in binds.Split(','))
-            {
-				trues.Add(Input.GetKeyDown(bind));
-            }
-			return trues.All(t => t == true);
+			var bindings = MelonPrefs.GetString("RecenterVR", option);
+			foreach (var binds in bindings.Split(':'))
+			{
+				var bind_trues = new bool[] { };
+				foreach (var bind in binds.Split(','))
+				{
+					bind_trues.Add(Input.GetKeyDown(bind));
+				}
+				if (bind_trues.All(t => t == true))
+					return true;
+			}
+			return false;
 		}
 
 		private static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
