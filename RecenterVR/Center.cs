@@ -1,7 +1,6 @@
 ﻿/*
- * Originally written by 
- * 
- * 
+ * Originally written by @Raicuparta#0015
+ * Modified by Bluscream
 */
 using System;
 using System.Linq;
